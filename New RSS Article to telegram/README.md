@@ -74,7 +74,7 @@ The workflow runs automatically every **30 minutes** and performs the following 
 
 The complete n8n workflow with all three connected nodes:
 
-![n8n Workflow](./workflow_screenshot.png)
+![n8n Workflow](./2.PNG)
 
 > **Flow:** RSS Feed Trigger → Limit → Send a text message
 
@@ -90,7 +90,7 @@ The complete n8n workflow with all three connected nodes:
 
 A sample of the message delivered to Telegram for each new article:
 
-![Telegram Message](./telegram_screenshot.png)
+![Telegram Message](./22.PNG)
 
 Each message contains:
 - Article title in bold
