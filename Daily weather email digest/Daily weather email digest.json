@@ -1,0 +1,164 @@
+{
+  "name": "Daily weather email digest",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "Every morning(8 am):\n   1. fetch the weather forecast for your city \n   2. send yourself a formatted email with the day's conditions, temperature, and tips.",
+        "height": 80,
+        "width": 528,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -160
+      ],
+      "id": "54396e87-2869-484d-9932-7d3ecfad76c5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -336,
+        -48
+      ],
+      "id": "f42e1521-e806-48c8-b249-34f8607fd72a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "http://api.weatherapi.com/v1/forecast.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "6eb39e8364154a0bb9084151262004"
+            },
+            {
+              "name": "q",
+              "value": "cairo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -128,
+        -48
+      ],
+      "id": "e8cf4bf9-47b9-44bd-8fee-4850637c447a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aac919ac-21ed-4707-9ba3-3ef9f6fa330c",
+              "name": "emailBody",
+              "value": "=🌤 Good morning! Here's your weather for {{ $json.location.name }} today:\n\n🌡 Temperature: {{ $json.current.temp_c }}°C (feels like {{ $json.current.feelslike_c }}°C)\n🌥 Condition: {{ $json.current.condition.text }}\n💧 Humidity: {{ $json.current.humidity }} %\n💨 Wind: {{ $json.forecast.forecastday[0].hour[0].wind_mph }} m/s\n\n{{ $json.current.temp_c  > 30 ? \"☀️ Hot day ahead — stay hydrated!\" : $json.current.temp_c < 15 ? \"🧥 It's chilly — dress warm!\" : \"🙂 Pleasant weather today. Enjoy your day!\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        -48
+      ],
+      "id": "b5b9f202-7349-4665-9911-6dc6f1f6d630",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "a7m7da7e3@gmail.com",
+        "subject": "=Weather Report",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        -48
+      ],
+      "id": "b795a123-e02f-479a-af94-adf2993f3ba2",
+      "name": "Send a message",
+      "webhookId": "635a69a8-7b3d-4cf8-b7d6-c515551bf771",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "AluXFzuDXq2F8fYC",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "d9ee9943-4693-46a9-961e-a21190a9506d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6ee8f8ba1a04841ce70beffae244a5515981f259d0f97489503c57f9e515dfb"
+  },
+  "id": "pKfpmA9TCH8l71eeR59c_",
+  "tags": []
+}
