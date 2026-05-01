@@ -1,0 +1,114 @@
+{
+  "name": "New RSS articles to Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        16
+      ],
+      "id": "48982da5-226f-400e-9642-41c14f4532d9",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "chatId": "1159259571",
+        "text": "=📰 *New Article*\n\n*{{ $json.title }}*\n\n{{ $json.contentSnippet ? $json.contentSnippet.slice(0, 200) + '...' : '' }}\n\n🔗 [Read more]({{ $json.link }})\n\n📅 {{ $json.pubDate ? new Date($json.pubDate).toLocaleDateString('en-GB', {weekday:'short', day:'2-digit', month:'short', year:'numeric'}) : '' }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        16
+      ],
+      "id": "eb10d282-ff47-42be-a505-17560ebc5451",
+      "name": "Send a text message",
+      "webhookId": "9763d8d7-54b4-48e3-9668-3df22779a7ce",
+      "credentials": {
+        "telegramApi": {
+          "id": "yaciOEN1Ay9ipTNT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Trigger: "
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        -144
+      ],
+      "id": "bab38b38-5f14-481b-a769-6fe2d24b7ce1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 30,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "feedUrl": "https://openai.com/news/rss.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        16
+      ],
+      "id": "fe396843-c6b3-4843-90e3-539d56b2d453",
+      "name": "RSS Feed Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "202f3e71-58e9-451a-b258-b47ffdc6fb2e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6ee8f8ba1a04841ce70beffae244a5515981f259d0f97489503c57f9e515dfb"
+  },
+  "id": "lCuYwJm41j1_a9HuheHgr",
+  "tags": []
+}
