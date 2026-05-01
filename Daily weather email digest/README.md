@@ -80,7 +80,7 @@ The workflow runs automatically every morning at **8:00 AM** and performs the fo
 
 The complete n8n workflow with all four connected nodes:
 
-![n8n Workflow](./workflow_screenshot.png)
+![n8n Workflow](./1.png)
 
 > **Nodes:** Schedule Trigger → HTTP Request → Edit Fields → Send a message (Gmail)
 
@@ -90,7 +90,7 @@ The complete n8n workflow with all four connected nodes:
 
 A sample of the delivered email each morning:
 
-![Email Output](./email_screenshot.png)
+![Email Output](./11.png)
 
 The email includes:
 - Current temperature and feels-like temperature (°C)
