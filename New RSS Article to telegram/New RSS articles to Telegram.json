@@ -40,13 +40,16 @@
     },
     {
       "parameters": {
-        "content": "Trigger: "
+        "content": "## 📡 New RSS Articles to Telegram\n\nMonitors an RSS feed every 30 minutes.\nWhen new articles are found, sends the latest ones to a Telegram chat.\n\n**Flow:** RSS Feed Trigger → Limit → Send a text message\n\n**To customize:**\n- Change the feed URL in the RSS Feed Trigger node\n- Change the max articles per run in the Limit node\n- Change the Chat ID in the Telegram node",
+        "height": 432,
+        "width": 640,
+        "color": 4
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1008,
-        -144
+        -560,
+        -272
       ],
       "id": "bab38b38-5f14-481b-a769-6fe2d24b7ce1",
       "name": "Sticky Note"
@@ -72,6 +75,54 @@
       ],
       "id": "fe396843-c6b3-4843-90e3-539d56b2d453",
       "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {
+        "content": "## 📡 RSS Feed Trigger\n\n**What it does:**\nPolls the RSS feed every 30 minutes and fires only for articles it hasn't seen before (automatic deduplication).\n\n**Currently watching:**\n`openai.com/news/rss.xml`\n\n**To change the source:**\nReplace the Feed URL with any valid RSS/Atom feed URL.",
+        "height": 256,
+        "width": 432,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        -448
+      ],
+      "id": "e2ddbe8d-902d-4e29-b7b8-678e99991818",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 🔢 Limit\n\n**What it does:**\nCaps the number of articles sent per trigger run to avoid flooding the Telegram chat.\n\n**Currently set to:** 5 articles max per run.\n\n**Tip:** Lower this to 1–2 if the feed publishes many articles at once.",
+        "height": 236,
+        "width": 432,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        -160
+      ],
+      "id": "65ffb56c-5866-4e9a-a815-f7b64fa02e05",
+      "name": "Sticky Note — Limit"
+    },
+    {
+      "parameters": {
+        "content": "## ✈️ Send a text message\n\n**What it does:**\nFormats each article as a Markdown message and sends it to a Telegram chat via bot.\n\n**Message includes:**\n- Article title (bold)\n- 200-char content preview\n- Clickable \"Read more\" link\n- Publication date\n\n**Parse Mode must be set to Markdown** for formatting to render correctly.",
+        "height": 332,
+        "width": 440,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        128
+      ],
+      "id": "b1927dee-be04-4767-b150-74bdc5fc8818",
+      "name": "Sticky Note — Telegram"
     }
   ],
   "pinData": {},
@@ -104,7 +155,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "202f3e71-58e9-451a-b258-b47ffdc6fb2e",
+  "versionId": "e55f1983-b2bf-4db2-9b01-7b2967d1fbae",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f6ee8f8ba1a04841ce70beffae244a5515981f259d0f97489503c57f9e515dfb"

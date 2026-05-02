@@ -1,0 +1,381 @@
+{
+  "name": "YouTube video summarizer",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.youtube-transcript.io/api/transcripts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Basic 69f49d44bbf94c669bf03e6e"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "={{ [$json.videoId] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -144,
+        0
+      ],
+      "id": "7dadfd3b-e2b5-4708-b2b7-57c3e791ae46",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. سحب الرابط من نود الـ Form \n// تأكد أن 'Video Link' هو نفس الاسم الموجود في إعدادات الـ Form Trigger\nconst rawUrl = $input.first().json['Video Link'] || \"\";\n\n// 2. تنظيف النص\nconst text = rawUrl.trim();\n\nfunction getYouTubeID(url) {\n    // مصفوفة الأنماط المدعومة (Watch, Shorts, Embed, Short-links)\n    const patterns = [\n        /v=([a-zA-Z0-9_-]{11})/,          \n        /be\\/([a-zA-Z0-9_-]{11})/,         \n        /embed\\/([a-zA-Z0-9_-]{11})/,       \n        /shorts\\/([a-zA-Z0-9_-]{11})/,      \n        /vi\\/([a-zA-Z0-9_-]{11})/           \n    ];\n\n    for (const pattern of patterns) {\n        const match = url.match(pattern);\n        if (match && match[1]) {\n            return match[1];\n        }\n    }\n    \n    // محاولة أخيرة للروابط المعقدة\n    const fallbackMatch = url.match(/[\\/|=]([a-zA-Z0-9_-]{11})(?:[\\?\\&\\s]|$)/);\n    return fallbackMatch ? fallbackMatch[1] : null;\n}\n\nconst videoId = getYouTubeID(text);\n\n// 3. التحقق النهائي قبل الإرسال لـ Notion أو الـ HTTP Request\nif (!videoId) {\n    throw new Error(`لم نتمكن من استخراج ID الفيديو. الرابط المستلم: \"${text}\"`);\n}\n\nreturn {\n    videoId: videoId,\n    originalUrl: text\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        0
+      ],
+      "id": "fd0c7072-f2bc-4877-84fd-523563796b52",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.microformat.playerMicroformatRenderer.title.simpleText }}\n---\n{{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=أنت خبير في تحليل المحتوى التقني وهندسة الذكاء الاصطناعي. مهمتك هي تلخيص نصوص فيديوهات اليوتيوب التعليمية بدقة عالية.\nعند استلام النص، قم بصياغة المخرجات باللغة العربية بتنسيق Markdown كالتالي:\n\n📌 العنوان الرئيسي\n(اكتب عنوان الفيديو بشكل جذاب)\n\n🎯 الهدف من الفيديو\n(سطر واحد يوضح القيمة الأساسية التي سيخرج بها المشاهد)\n\n📝 النقاط الجوهرية (Key Insights)\nاستخدم نقاطاً واضحة لشرح المفاهيم التقنية (مثل الفرق بين الـ Workflow والـ Agent).\n\nركز على المصطلحات التقنية الهامة.\n\n💡 الخلاصة والتوصية\n(نصيحة عملية بناءً على ما ورد في الفيديو).\n\nملاحظة: إذا كان النص يحتوي على كود برمجى أو أدوات (مثل Anthropic أو n8n)، اذكرها بوضوح."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        64,
+        0
+      ],
+      "id": "a83b33f3-b727-4c43-8316-fb2c79d8755a",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "353965e95908802c9e8cfd8751d68777",
+          "mode": "id"
+        },
+        "title": "Youtube Video Summarizer",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Title|title",
+              "title": "={{ $('HTTP Request').item.json.title }}"
+            },
+            {
+              "key": "URL|url",
+              "ignoreIfEmpty": true,
+              "urlValue": "=https://www.youtube.com/watch?v={{ $('HTTP Request').item.json.id }}"
+            },
+            {
+              "key": "Summary|rich_text",
+              "textContent": "={{ $json.text.substring(0, 1990) + '...' }}"
+            },
+            {
+              "key": "Date|date",
+              "date": "={{ $('HTTP Request').item.json.microformat.playerMicroformatRenderer.publishDate }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        160
+      ],
+      "id": "5e845833-5da6-4854-b470-1d9eb9cae8f9",
+      "name": "Create a database page",
+      "credentials": {
+        "notionApi": {
+          "id": "Y06DKIJYRfFD4LCj",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1159259571",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        -144
+      ],
+      "id": "7e49b67e-e5a1-4d81-becf-9bc51d3c46f6",
+      "name": "Send a text message",
+      "webhookId": "8da5030b-5634-4ee4-a0e1-9975996bd28f",
+      "credentials": {
+        "telegramApi": {
+          "id": "yaciOEN1Ay9ipTNT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Youtube Video Summarizer",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Video Link"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -560,
+        0
+      ],
+      "id": "a11205b9-689a-407f-8b6f-e442ba047efa",
+      "name": "On form submission",
+      "webhookId": "b57e37da-c4cf-4821-8981-099b728bfe04"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        208
+      ],
+      "id": "e1a238bd-63fd-4968-b7c4-fb5a02136bcf",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "BXd02COO7ee5NZjj",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🔗 Basic LLM Chain + Google Gemini\n\n**What it does:**\nSends the video title and transcript to Google Gemini and receives a structured Arabic summary in Markdown format.\n\n**Prompt output format:**\n- 📌 Main title\n- 🎯 Video objective\n- 📝 Key technical insights\n- 💡 Conclusion and recommendation\n\n**Model:** Google Gemini (via PaLM API)\n**Language:** Arabic\n\n**To change language:** Edit the system message in the Basic LLM Chain node.\n**To change model:** Swap the Gemini sub-node for OpenAI, Claude, or any other LangChain-compatible model.",
+        "height": 422,
+        "width": 796,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -192
+      ],
+      "id": "67ff7d8b-a161-4e55-ba16-6504285cd484",
+      "name": "Sticky Note — LLM"
+    },
+    {
+      "parameters": {
+        "content": "## 🌐 HTTP Request\n\n**What it does:**\nCalls the YouTube Transcript API to fetch the full video transcript and metadata (title, publish date, etc.).\n\n**API used:** youtube-transcript.io\n**Method:** POST\n**Auth:** Basic (API key in Authorization header)\n\n**Key output fields used downstream:**\n- `text` — full transcript text\n- `title` — video title\n- `id` — video ID (for URL construction)\n- `microformat.playerMicroformatRenderer.publishDate` — publish date\n\n**Note:** Replace the Authorization header value with your own API key.",
+        "height": 374,
+        "width": 798,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -592
+      ],
+      "id": "ccc97f0b-1c64-4860-90e2-1c8257e68d13",
+      "name": "Sticky Note — HTTP"
+    },
+    {
+      "parameters": {
+        "content": "## 🔧 Code in JavaScript\n\n**What it does:**\nExtracts the 11-character YouTube Video ID from any URL format submitted in the form.\n\n**Supported formats:**\n- Standard watch links (`v=`)\n- Short links (`youtu.be/`)\n- Embed links (`embed/`)\n- Shorts (`shorts/`)\n- vi links (`vi/`)\n\n**Output fields:**\n- `videoId` — the extracted 11-char ID\n- `originalUrl` — the original URL as submitted\n\n**Error handling:**\nThrows a clear Arabic error if the ID cannot be extracted.",
+        "height": 438,
+        "width": 446,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -208
+      ],
+      "id": "2b8b33c1-7a38-4296-a9b4-16e98867d2a8",
+      "name": "Sticky Note — Code"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 On Form Submission\n\n**What it does:**\nProvides a simple web form where the user pastes a YouTube URL and submits it to start the workflow.\n\n**Form field:**\n`Video Link` — accepts any YouTube URL format:\n- `youtube.com/watch?v=...`\n- `youtu.be/...`\n- `youtube.com/shorts/...`\n- `youtube.com/embed/...`\n\n**How to access the form:**\nClick the node → copy the Production URL and open it in any browser.",
+        "height": 374,
+        "width": 446,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -592
+      ],
+      "id": "527e0b02-bb7b-4845-995e-dd8b5db07168",
+      "name": "Sticky Note — Form"
+    },
+    {
+      "parameters": {
+        "content": "## 🎬 YouTube Video Summarizer\n\nSubmit any YouTube URL via the form and get:\n- 🤖 An AI-generated Arabic summary (Gemini)\n- ✈️ Summary delivered to Telegram instantly\n- 🗄️ Summary + metadata saved to Notion DB\n\n**Flow:**\nForm → Extract Video ID → Fetch Transcript → AI Summary → Telegram + Notion\n\n**To customize:**\n- Change the language/format in the LLM prompt (Basic LLM Chain)\n- Swap Google Gemini for any other model\n- Update the Notion database ID and property names",
+        "height": 708,
+        "width": 1288,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        -352
+      ],
+      "id": "cdbfe27d-ae88-40b0-b571-5359aa1384fd",
+      "name": "Sticky Note — Overview"
+    },
+    {
+      "parameters": {
+        "content": "## ✈️ Send a text message\n\n**What it does:**\nSends the AI-generated summary directly to a Telegram chat as a text message.\n\n**Sends:** The full `text` output from the LLM Chain.\n\n**Note:** Telegram messages have a 4096-character limit.\nIf summaries are being cut off, add a Set node before this one to trim: `$json.text.substring(0, 4000)`",
+        "height": 260,
+        "width": 548,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        288
+      ],
+      "id": "5a93261c-c482-4945-a073-0b6206e702e4",
+      "name": "Sticky Note — Telegram"
+    },
+    {
+      "parameters": {
+        "content": "## 🗄️ Create a database page\n\n**What it does:**\nCreates a new page in the Notion database with the video's metadata and AI summary.\n\n**Properties written:**\n- `Title` — video title (from transcript API)\n- `URL` — full YouTube watch link\n- `Summary` — first 1990 chars of AI summary\n- `Date` — original video publish date\n\n**Note:** Notion rich_text fields are limited to 2000 characters. The summary is trimmed to 1990 + '...' to stay within limits.\n\n**To change the database:** Update the Database ID in this node's settings.",
+        "height": 390,
+        "width": 504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        288
+      ],
+      "id": "f96943ad-5cb0-4d47-a12e-fb2dd5c17696",
+      "name": "Sticky Note — Notion"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create a database page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "14aa53b6-cf9c-4851-8476-de5e9a3eab3e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6ee8f8ba1a04841ce70beffae244a5515981f259d0f97489503c57f9e515dfb"
+  },
+  "id": "-jYSCTMkXJYIK-yX6EiM6",
+  "tags": []
+}

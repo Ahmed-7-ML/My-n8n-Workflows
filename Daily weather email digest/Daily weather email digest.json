@@ -3,16 +3,16 @@
   "nodes": [
     {
       "parameters": {
-        "content": "Every morning(8 am):\n   1. fetch the weather forecast for your city \n   2. send yourself a formatted email with the day's conditions, temperature, and tips.",
-        "height": 80,
-        "width": 528,
+        "content": "## 🌤 Daily Weather Email Digest\n\nEvery morning (8 AM):\n1. Fetch the weather forecast for your city\n2. Format and send a weather digest to your inbox\n\n**Setup:** Set your city in the HTTP Request node and connect Gmail.",
+        "height": 352,
+        "width": 880,
         "color": 4
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -368,
-        -160
+        -384,
+        -240
       ],
       "id": "54396e87-2869-484d-9932-7d3ecfad76c5",
       "name": "Sticky Note"
@@ -154,7 +154,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "d9ee9943-4693-46a9-961e-a21190a9506d",
+  "versionId": "826e6c61-74b5-4acf-b804-e63d878a56d4",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f6ee8f8ba1a04841ce70beffae244a5515981f259d0f97489503c57f9e515dfb"
