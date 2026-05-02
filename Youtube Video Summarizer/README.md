@@ -81,7 +81,7 @@ The workflow is triggered via a web form and runs the following steps:
 
 The complete n8n workflow with all nodes:
 
-![n8n Workflow](./workflow_screenshot.png)
+![n8n Workflow](./3.png)
 
 > **Flow:** On form submission → Code in JavaScript → HTTP Request → Basic LLM Chain (+ Google Gemini) → Send a text message + Create a database page
 
@@ -103,7 +103,7 @@ The complete n8n workflow with all nodes:
 
 The AI-generated Arabic summary delivered to Telegram immediately after processing:
 
-![Telegram Output](./telegram_screenshot.png)
+![Telegram Output](./31.png)
 
 Each summary follows this structured Markdown format:
 - **📌 العنوان الرئيسي** — Attractive reformatted video title
@@ -115,7 +115,7 @@ Each summary follows this structured Markdown format:
 
 Each processed video archived as a searchable record:
 
-![Notion Database](./notion_screenshot.png)
+![Notion Database](./32.png)
 
 Each record contains the video title, original YouTube URL, AI-generated summary, and the video's publish date — building a fully searchable personal knowledge library over time.
 
